@@ -1,0 +1,104 @@
+---
+title: "Shopify Assessment"
+author: "Anil Kumar pathipati"
+date: "08/09/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Introduction** :
+---------------
+
+Question 1: Given some sample data, write a program to answer the following: click here to access the required data set
+
+On Shopify, we have exactly 100 sneaker shops, and each of these shops sells only one model of shoe. We want to do some analysis of the average order value (AOV). When we look at orders data over a 30 day window, we naively calculate an AOV of $3145.13. Given that we know these shops are selling sneakers, a relatively affordable item, something seems wrong with our analysis
+
+Lets go ahead and load the given data set
+
+
+```{r}
+library(tidyverse)
+library(plotly)
+
+```
+
+```{r}
+
+df<-read.csv("C://Users//maila//Desktop//Test REPL//REPL_ML_Exercise//2019 Winter Data Science Intern Challenge Data Set - Sheet1.csv", header = T)
+head(df)
+```
+It is said that the AOV found is #3145.13. Lets try to understand where this is coming from. For now lets calculate the same by taking straight average of the sale value
+
+It looks like the above value is a straight average value taken from the order amount.
+```{r}
+mean(df$order_amount)
+
+```
+
+```{r}
+summary(df)
+
+```
+From above, we see that the order amount has a maximum value of 704000 which looks like an outlier. Now, lets look at what exactly is this transaction.
+
+```{r}
+subset(df,df$order_amount==704000)
+
+```
+From above, we see that there are many transactions with an order amount 70400$ which is done using credit card by same user id 607 with a same shop id 42 and purchased same items which are 2000. This is so weird. It looks like the user is purchasing every 3 days at one particular point same items and in some days the data is duplicated especially on 2017-03-28. 
+
+Lets try to see if there are any other transactions like this in our data set. This can be found by visualising the given data set.
+
+```{r}
+a=ggplot(df, aes(x=order_id, y=order_amount))+geom_point()+theme_classic()
+b=ggplotly(a)
+b
+```
+From above it shows that these transactions with 70400$ are the big outlier when calculating the AOV. It is caused due to the fact that the rows are duplicated and also the there is something not right with this transaction which is done every 3 days. It may be possible only if Shopify was running a sale and there is a limit in the purchase quantity per user/day or 3 days. This has lead for the buyer to accumulate stock at a cheaper price from shopify and he may be planning to sell it high post shopify sale or in his retail.
+
+**Answers - Question1** :
+------------------
+
+One way to look at this may be using a Median value because mean is not always reliable in this skewed data sets. When we look at median we will get an AOV of 284$ which is close to actuals. 
+
+I would report a median value for this data set if asked and highlight the transaction which looks like an outlier and clean the raw data set to prevent duplicate transactions.
+
+The median value as said above would be 284$
+
+```{r}
+median(df$order_amount)
+
+```
+
+
+
+**Question 2**
+-------------
+
+1. SELECT count(*)FROM Orders AS A, Shippers AS B WHERE A.ShipperId = B.ShipperId AND ShipperName = "Speedy Express";
+
+Total orders shipped via speedy express are 54
+
+2. SELECT  E.LastName  FROM Employees AS E, Orders AS A WHERE E.EmployeeID = A.EmployeeID GROUP BY E.EmployeeID ORDER BY count(OrderID) DESC Limit 1;
+
+The Last Name is Peacock
+
+3.SELECT Customers.Country,  
+  OrderDetails.ProductID,OrderDetails.Quantity,Products.ProductID,Products.ProductName 
+FROM Customers 
+INNER JOIN Orders on Customers.CustomerID=Orders.CustomerID
+INNER JOIN OrderDetails ON Orders.OrderID=OrderDetails.OrderID
+INNER JOIN Products ON OrderDetails.ProductID=Products.ProductID where Country=="Germany" Group By ProductName Order By Quantity Desc Limit 1
+
+The top selling product in Germany is "Steeleye Stout"
+
+
+
+
+
+
+
+
